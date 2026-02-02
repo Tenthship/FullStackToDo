@@ -31,6 +31,7 @@ function displayLastTask() {
                     <p>${currTask.date}</p>
                     <p>${currTask.completed}</p>
                     <button onclick="deleteTask(${currTask.id})">Delete</button>
+                    <button id="editButton">Edit</button>
                 </div>
             `   
 
@@ -44,11 +45,12 @@ function displayTasks() {
         .then(todos => {
         todos.forEach(todo => {
             tasks.innerHTML += `
-                <div class="task">
+                <div class="task" id=${todo.id}>
                     <p>${todo.task}</p>
                     <p>${todo.date}</p>
                     <p>${todo.completed}</p>
                     <button onclick="deleteTask(${todo.id})">Delete</button>
+                    <button onclick="editTask(${todo.id})">Edit</button>
                 </div>
             `
         })
@@ -64,3 +66,48 @@ function deleteTask(id){
         displayTasks()
     })
 }
+
+function editTask(id) {
+    fetch(`${URL}/todo/${id}`)
+        .then(res => res.json())
+        .then(todo => {
+            console.log(todo.id)
+            const elements = document.querySelectorAll('.task')
+            elements.forEach(elem => {
+                if (elem.id == id) {
+                    const firstTag = elem.querySelector('p')
+                    firstTag.contentEditable = true
+                    firstTag.focus()
+                    firstTag.onblur = () => editedTask(id)
+                    document.addEventListener("keydown", (e) => {
+                        if (e.key == "Enter") {
+                            editedTask(id)
+                        }
+                    })
+                }
+            })
+        })
+    console.log("Pooping")
+}
+
+function editedTask(id) {
+    const elements = document.querySelectorAll('.task')
+        elements.forEach(elem => {
+        if (elem.id == id) {
+            const firstTag = elem.querySelector('p')
+            firstTag.contentEditable = false
+
+            fetch(`${URL}/todo/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ task: firstTag.textContent})
+            }).then(() => {
+                console.log("Task updated")
+            })
+        }
+    })
+}
+
+
+
+//contenteditable="true"

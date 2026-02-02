@@ -19,6 +19,16 @@ app.get("/todo", (req, res) => {
     })
 })
 
+app.get("/todo/:id", (req, res) => {
+    const id = req.params.id
+    sql = `SELECT * FROM tasks WHERE id = ?`
+    db.get(sql,[id],(err,row) => {
+        if (err) return console.error(err.message)
+        console.log(row)
+        res.json(row)
+    })
+})
+
 app.post("/todo", (req, res) => {
     sql = `INSERT INTO tasks(task,date,completed) VALUES (?,?,?)`
     db.run(sql,[req.body.task, new Date(), 0],(err) => {
@@ -29,6 +39,11 @@ app.post("/todo", (req, res) => {
 
 app.put("/todo/:id", (req, res) => {
   // UPDATE todos SET completed = ? WHERE id = ?
+  sql = `UPDATE tasks SET task = ? WHERE id = ?`
+  db.run(sql, [req.body.task, req.params.id], (err) => {
+    if (err) return console.error(err.message)
+    res.json({ success: true })
+  })
 })
 
 app.delete("/todo/:id", (req, res) => {
@@ -44,4 +59,5 @@ app.delete("/todo/:id", (req, res) => {
 
 app.listen(PORT, () => {
     console.log("Server running")
+    console.log(`Running at: http://localhost:${PORT}`)
 })
