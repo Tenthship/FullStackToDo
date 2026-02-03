@@ -13,31 +13,28 @@ inputButton.addEventListener("click", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ task: inputTask.value})
     })
+    .then(res => res.json())
     .then(() => {
+        // Fetch just to get the new task's ID
+        return fetch(`${URL}/todo`)
+    })
+    .then(res => res.json())
+    .then(todos => {
+        const currTask = todos.at(-1)
+        const newTaskDiv = document.createElement('div')
+        newTaskDiv.className = 'task'
+        newTaskDiv.id = currTask.id
+        newTaskDiv.innerHTML = `
+            <p>${currTask.task}</p>
+            <p>${currTask.date}</p>
+            <p>${currTask.completed}</p>
+            <button onclick="deleteTask(${currTask.id})">Delete</button>
+            <button onclick="editTask(${currTask.id})">Edit</button>
+        `
+        tasks.appendChild(newTaskDiv)
         inputTask.value = ""
-        displayLastTask()
     })
 })
-
-function displayLastTask() {
-    fetch(`${URL}/todo`)
-        .then(res => res.json())
-        .then(todos => {
-            console.log(todos.at(-1))
-            currTask = todos.at(-1)
-            tasks.innerHTML += `
-                <div class="task">
-                    <p>${currTask.task}</p>
-                    <p>${currTask.date}</p>
-                    <p>${currTask.completed}</p>
-                    <button onclick="deleteTask(${currTask.id})">Delete</button>
-                    <button id="editButton">Edit</button>
-                </div>
-            `   
-
-    })
-
-}
 
 function displayTasks() {
     fetch(`${URL}/todo`)
@@ -62,8 +59,8 @@ function deleteTask(id){
         method: "DELETE",
     })
     .then(() => {
-        tasks.innerHTML = ""
-        displayTasks()
+        const taskElement = document.getElementById(id);
+        taskElement.remove();
     })
 }
 

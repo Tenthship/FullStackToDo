@@ -31,7 +31,9 @@ app.get("/todo/:id", (req, res) => {
 
 app.post("/todo", (req, res) => {
     sql = `INSERT INTO tasks(task,date,completed) VALUES (?,?,?)`
-    db.run(sql,[req.body.task, new Date(), 0],(err) => {
+    const date = new Date()
+    const formattedDateUTC = date.toISOString().split('T')[0]
+    db.run(sql,[req.body.task, formattedDateUTC, 0],(err) => {
         if (err) return console.error(err.message)
         res.json({ success: true })
     })
